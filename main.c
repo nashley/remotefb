@@ -66,7 +66,7 @@ int main(int argc, int **argv){
     bytespp = (vinfo.bits_per_pixel / 8);
     //int bytespp = 1;
     
-    printf("fbp:%x Prev:%x xoffset:%d yoffset:%d bytespp:%d line_length:%d\n", fbp, previous_buffer, vinfo.xoffset, vinfo.yoffset, bytespp, finfo.line_length);
+    printf("fbp:0x%x Prev:0x%x xoffset:%d yoffset:%d bytespp:%d line_length:%d\n", fbp, previous_buffer, vinfo.xoffset, vinfo.yoffset, bytespp, finfo.line_length);
     printf("Color Offsets (rgb): (%hhu, %hhu, %hhu)\n", vinfo.red.offset, vinfo.green.offset, vinfo.blue.offset);
 
     void *previous_buffer;
@@ -75,7 +75,7 @@ int main(int argc, int **argv){
 
     get_screenshot(&vinfo, &finfo);
 
-    printf("bacon (differences: %d)\n", d);
+    printf("First Screenshot differences: %d\n", d);
 
     clock_t toc = clock();
 
@@ -86,7 +86,8 @@ int main(int argc, int **argv){
     //get_screenshot(&vinfo, &finfo);get_screenshot(&vinfo, &finfo);get_screenshot(&vinfo, &finfo);get_screenshot(&vinfo, &finfo);get_screenshot(&vinfo, &finfo);get_screenshot(&vinfo, &finfo);get_screenshot(&vinfo, &finfo);get_screenshot(&vinfo, &finfo);get_screenshot(&vinfo, &finfo);
 
     printf("Screenshot time 1: %f\n", (double)(toc-tic)/CLOCKS_PER_SEC);
-    printf("Screenshot time 2: %f (differences: %d)\n", (double)(tac-toc)/CLOCKS_PER_SEC, d);
+    printf("Screenshot time 2: %f\n", (double)(tac-toc)/CLOCKS_PER_SEC);
+    printf("Second Screenshot differences: %d\n", d);
 
     munmap(fbp, screensize);
     //ioctl(fd, KDSETMODE, KD_TEXT);
@@ -100,16 +101,8 @@ void get_screenshot(struct fb_var_screeninfo *vinfo, struct fb_fix_screeninfo *f
 	for(int x = 0; x < vinfo->xres; x++)
     	for(int y = 0; y < vinfo->yres; y++){
     		location = (x + vinfo->xoffset) * bytespp + (y + vinfo->yoffset) * finfo->line_length;
-			if(*(fbp+location) != *(previous_buffer+location)){
-		     	*(previous_buffer+location) = *((uint8_t*)(fbp+location));
-		     	d++;
-		    }
-		    if(*((uint8_t*)(fbp+location+1)) != *((uint8_t*)(previous_buffer+location+1))){
-	    		*(previous_buffer+location+1) = *((uint8_t*)(fbp+location+1));
-	    		d++;
-	    	}
-	    	if(*((uint8_t*)(fbp+location+2)) != *((uint8_t*)(previous_buffer+location+2))){
-	    		*(previous_buffer+location+2) = *((uint8_t*)(fbp+location+2));
+			if(*((uint32_t*)(fbp+location)) != *((uint32_t*)(previous_buffer+location))){
+	    		*((uint32_t*)(previous_buffer+location)) = *((uint32_t*)(fbp+location));
 	    		d++;
 			 //if(__builtin_expect(memcmp(*(fbp+location), *(previous_buffer+location)/* || *((uint8_t*)(fbp+location+1)) ^ *((uint8_t*)(previous_buffer+location+1)) ^ *((uint8_t*)(fbp+location+2)) != *((uint8_t*)(previous_buffer+location+2))*/,uint8_t) != 0, 0)){
      			//printf("Different @ %ld!\n", location);
