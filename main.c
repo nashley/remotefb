@@ -101,8 +101,10 @@ int main(int argc, int **argv){
 
 void get_screenshot(struct fb_var_screeninfo *vinfo, struct fb_fix_screeninfo *finfo){
     d = 0;
-    for(int x = 0; x < vinfo->xres; x+=bytespp * finfo->line_length)
+    //printf("xres:%d yres:%d xd:%d yd: %d\n", vinfo->xres, vinfo->yres, bytespp * finfo->line_length);
+    for(int x = 0; x < vinfo->xres; x+=bytespp)
         for(int y = 0; y < vinfo->yres; y+=bytespp * finfo->line_length){
+            //printf("xoff: %d yoff:%d x:%d y:%d\n", xoff, yoff, x, y);
             location = (x + xoff) + (y + yoff);
             printf("Location: %lu\n", location);
             if(*((uint32_t*)(fbp+location)) != *((uint32_t*)(previous_buffer+location))){
