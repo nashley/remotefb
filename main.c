@@ -104,7 +104,10 @@ void get_screenshot(struct fb_var_screeninfo *vinfo, struct fb_fix_screeninfo *f
     for(int x = 0; x < vinfo->xres; x+=bytespp)
         for(int y = 0; y < vinfo->yres; y+=bytespp){
             location = (x + xoff) + (y + yoff) * finfo->line_length;
+            if(*((uint32_t*)(fbp+location)) != *((uint32_t*)(previous_buffer+location))){
                 memcpy((previous_buffer+location),(fbp+location), sizeof(uint32_t));
+                d++;
+            }
              //if(__builtin_expect(memcmp(*(fbp+location), *(previous_buffer+location)/* || *((uint8_t*)(fbp+location+1)) ^ *((uint8_t*)(previous_buffer+location+1)) ^ *((uint8_t*)(fbp+location+2)) != *((uint8_t*)(previous_buffer+location+2))*/,uint8_t) != 0, 0)){
                 //printf("Different @ %ld!\n", location);
             //printf("Location: %ld\n", location);
