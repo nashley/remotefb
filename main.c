@@ -76,8 +76,8 @@ int main(int argc, int **argv){
 
     int i = 0;
 
-    xoff = vinfo.xoffset;
-    yoff = vinfo.yoffset;
+    xoff = vinfo.xoffset * finfo.line_length;
+    yoff = vinfo.yoffset * finfo.line_length;
 
     while(1){
 
@@ -101,9 +101,10 @@ int main(int argc, int **argv){
 
 void get_screenshot(struct fb_var_screeninfo *vinfo, struct fb_fix_screeninfo *finfo){
     d = 0;
-    for(int x = 0; x < vinfo->xres; x+=bytespp)
-        for(int y = 0; y < vinfo->yres; y+=bytespp){
-            location = (x + xoff) + (y + yoff) * finfo->line_length;
+    for(int x = 0; x < vinfo->xres; x+=bytespp * finfo->line_length)
+        for(int y = 0; y < vinfo->yres; y+=bytespp * finfo->line_length){
+            location = (x + xoff) + (y + yoff);
+            printf("Location: %lu\n", location);
             if(*((uint32_t*)(fbp+location)) != *((uint32_t*)(previous_buffer+location))){
                 memcpy((previous_buffer+location),(fbp+location), sizeof(uint32_t));
                 d++;
