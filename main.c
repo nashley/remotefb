@@ -21,6 +21,9 @@ static uint8_t *fbp;
 static long int location = 0;
 long int screensize = 0;
 
+int xoff;
+int yoff;
+
 int d;
 
 int bytespp;
@@ -73,6 +76,9 @@ int main(int argc, int **argv){
 
     int i = 0;
 
+    xoff = vinfo.xoffset;
+    yoff = vinfo.yoffset;
+
     while(1){
 
         clock_t tic = clock();
@@ -95,15 +101,12 @@ int main(int argc, int **argv){
 
 void get_screenshot(struct fb_var_screeninfo *vinfo, struct fb_fix_screeninfo *finfo){
     d = 0;
-    for(int x = 0; x < vinfo->xres; x++)
-        for(int y = 0; y < vinfo->yres; y++){
-            location = (x + vinfo->xoffset) * bytespp + (y + vinfo->yoffset) * finfo->line_length;
-            if(*((uint32_t*)(fbp+location)) != *((uint32_t*)(previous_buffer+location))){
-                *((uint32_t*)(previous_buffer+location)) = *((uint32_t*)(fbp+location));
-                d++;
+    for(int x = 0; x < vinfo->xres; x+=bytespp)
+        for(int y = 0; y < vinfo->yres; y+=bytespp){
+            location = (x + xoff) + (y + yoff) * finfo->line_length;
+                memcpy((previous_buffer+location),(fbp+location), sizeof(uint32_t));
              //if(__builtin_expect(memcmp(*(fbp+location), *(previous_buffer+location)/* || *((uint8_t*)(fbp+location+1)) ^ *((uint8_t*)(previous_buffer+location+1)) ^ *((uint8_t*)(fbp+location+2)) != *((uint8_t*)(previous_buffer+location+2))*/,uint8_t) != 0, 0)){
                 //printf("Different @ %ld!\n", location);
-            }
             //printf("Location: %ld\n", location);
             //*(fbp + location + 0) = 100;
             //printf("(x=%4d,y=%4d) Location: %ld BGR: (%hhu,%hhu,%hhu : %hhu,%hhu,%hhu)\n", x, y, location, *((uint8_t*)(fbp+location+0)), *((uint8_t*)(fbp+location+1)), *((uint8_t*)(fbp+location+2)) , *((uint8_t*)(previous_buffer+location+0)), *((uint8_t*)(previous_buffer+location+1)), *((uint8_t*)(previous_buffer+location+2)) );
